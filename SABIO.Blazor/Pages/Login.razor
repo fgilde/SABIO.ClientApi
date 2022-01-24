@@ -1,0 +1,92 @@
+﻿@page "/login"
+@page "/login/{loginToken}"
+@layout EmptyLayout
+@using SABIO.ClientApi.Core;
+@using SABIO.ClientApi.Responses;
+
+@inject SabioClient sabioClient;
+@inject NavigationManager url;
+@inject IJSRuntime runtime;
+
+
+<div class="limiter">
+    <div class="container-login100">
+        <div class="wrap-login100">
+
+
+            <div class="login100-form validate-form p-l-55 p-r-55 p-t-178">
+
+                @if (loginFailed)
+                {
+                    <span class="login100-form-title failure">
+                        Login Failed
+                    </span>
+                }
+                else
+                {
+                    <span class="login100-form-title" @style="@(!showUserAndPass ? "background-color:orange" : null)">
+                        Sign In
+                    </span>
+                }
+
+                @if (showUserAndPass && string.IsNullOrEmpty(loginToken))
+                {
+                    <div class="wrap-input100 validate-input m-b-16" data-validate="Please enter username">
+                        <input type="text" @bind="@name" onkeyup="@OnKeyUp"  class="input100" name="username" placeholder="Username" />
+                        <span class="focus-input100"></span>
+                    </div>
+
+                    <div class="wrap-input100 validate-input" data-validate="Please enter password">
+                        <input type="password" @bind="@password" onkeyup="@OnKeyUp" class="input100" name="pass" placeholder="Password" />
+                        <span class="focus-input100"></span>
+                    </div>
+                    <br />
+                }
+                else if (!string.IsNullOrEmpty(loginToken))
+                {
+                    <div class="wrap-input100 validate-input">
+                        <input type="text" @bind="@loginToken" class="input100" name="pass" placeholder="logintoken" />
+                        <span class="focus-input100"></span>
+                    </div><br />
+                }
+
+                <div class="wrap-input100 validate-input" data-validate="Enter realm">
+                    <input type="text" @onchange="@onRealmChange" class="input100" value="@sabioClient.Realm" name="realm" placeholder="Realm" />
+                    <span class="focus-input100"></span>
+                </div>
+
+                <div class="text-right p-t-13 p-b-23">
+                    <span @onclick=@ShowServer class="txt1">
+                        Server:
+                    </span>
+
+                    <a @onclick=@ShowServer class="txt2 @(!serverAddressHidden ? "hidden" : null)">
+                        @sabioClient.BaseUrl.AbsoluteUri
+                    </a>
+                    <input type="text" @onchange="@onServerChange" value="@sabioClient.BaseUrl.AbsoluteUri" class="input100 @(serverAddressHidden ? "hidden" : null)" name="server" placeholder="Server" />
+                </div>
+
+                <div class="container-login100-form-btn">
+                    <button @onclick="@OnLogin" class="login100-form-btn">
+                        @if (showUserAndPass)
+                        {
+                            <p>Sign In</p>
+                        }
+                        else
+                        {
+                            <p>Sign In on Provider</p>                            
+                        }
+                    </button>
+                </div>
+
+                <div class="flex-col-c p-t-170 p-b-40">
+                    <a href="http://getsabio.com" target="_blank" class="txt3">
+                        SABIO
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

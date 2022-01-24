@@ -1,0 +1,61 @@
+﻿@using SABIO.ClientApi.Responses.Types
+@using SABIO.ClientApi.Types
+
+@page "/texts"
+@page "/texts/{Id}"
+@inherits SABIO.Blazor.Components.ResourceListComponent<SABIO.ClientApi.Core.Api.TextsApi, TextResult>
+
+<div>
+    <h1>Texts <span class="small-info">@Results?.Length Results</span></h1>
+    <input type="text" placeholder="Search" bind="@Query" @onkeyup="@CheckEnterAndLoad" />
+
+    <div class="right-top">
+        <p>
+            <button class="btn btn-primary" @onclick="@Load">Load @SearchQuery.Default.Limit more</button>
+
+            <button class="btn btn-primary" onclick="@LoadAll">Load All</button>
+        </p>
+    </div>
+
+    <hr />
+</div>
+
+<div class="flex-container">
+    <div class="flex-item noborder nopadding">
+        @if (Results != null)
+        {
+            <div class="list-group">
+                @foreach (var text in Results)
+                {
+                    <a href="/texts/@text.Id" class="list-group-item list-group-item-action flex-column align-items-start @(Detail?.Result?.Id == text.Id ? "active" : "") ">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@text.Title</h5>
+                            <small>@text.Created</small>
+                        </div>
+                        <p class="mb-1">
+                            @((MarkupString)text.Excerpt)
+                        </p>
+                        <small>@text.CreatedBy</small>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+    @if (Detail != null)
+    {
+        <div class="flex-item text-content text-content">
+            <h2>@Detail?.Result?.Title</h2>
+            @foreach (var fragment in Detail?.Result?.Fragments)
+            {
+                @((MarkupString)fragment.Content)
+
+                <div class="tags">
+                    Tags: @string.Join(",", fragment.Tags)
+                </div>
+
+            }
+        </div>
+    }
+
+</div>
+

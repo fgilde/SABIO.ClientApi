@@ -1,0 +1,50 @@
+﻿@using SABIO.Blazor.Extensions
+@using SABIO.ClientApi.Core
+@using SABIO.ClientApi.Responses.Types
+@using SABIO.ClientApi.Types
+@page "/documents"
+@page "/documents/{Id}"
+@inherits SABIO.Blazor.Components.ResourceListComponent<SABIO.ClientApi.Core.Api.DocumentsApi, DocumentResult>
+@inject SabioClient sabioClient
+
+<div>
+    <h1>Documents <span class="small-info">@Results?.Length Results</span></h1>
+    
+    <div class="right-top">
+        <button class="btn btn-primary" @onclick="@Load">Load @SearchQuery.Default.Limit more</button>
+        <button class="btn btn-primary" @onclick="@LoadAll">Load All</button>
+    </div>
+    <hr />
+</div>
+
+<div class="flex-container">
+    <div class="flex-item noborder nopadding">
+        @if (Results != null)
+        {
+            <div class="list-group">
+                @foreach (var doc in Results)
+                {
+                    <a href="/documents/@doc.Id" class="list-group-item list-group-item-action flex-column align-items-start @(Detail?.Result?.Id == doc.Id ? "active" : "") ">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@doc.Title</h5>
+                            <small>@doc.Created</small>
+                        </div>
+                        <p class="mb-1">
+                            @((MarkupString)doc.Excerpt)
+                        </p>
+                        <small>@doc.CreatedBy</small>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+
+    @if (Detail != null && Detail.Result != null)
+    {
+        <div class="flex-item">
+            <iframe style="height: 100%; width: 100%"
+                    src="@Detail.Result.CreateViewerUrl(sabioClient)"></iframe>            
+        </div>
+    }
+
+</div>
