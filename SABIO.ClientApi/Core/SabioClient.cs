@@ -70,7 +70,8 @@ namespace SABIO.ClientApi.Core
 
         public Task<TResponse> PostAsync<TResponse>(string path, object httpContent = null, object getParams = null) where TResponse : class
         {
-            return PostAsync<TResponse>(path, httpContent?.ToStringContent(), getParams);
+            var stringContent = httpContent?.ToStringContent();
+            return PostAsync<TResponse>(path, stringContent, getParams);
         }
 
         public Task<TResponse> PostAsync<TResponse>(string path, HttpContent httpContent = null, object getParams = null) where TResponse : class
@@ -112,6 +113,7 @@ namespace SABIO.ClientApi.Core
         private HttpClient CreateHttpClient()
         {
             var result = new HttpClient();
+            result.BaseAddress = BaseUrl;
             result.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             result.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
             return result;

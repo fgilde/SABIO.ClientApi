@@ -34,7 +34,8 @@ namespace SABIO.ClientApi.Extensions
 
         public static async Task<TContent> ReadAsAsync<TContent>(this Task<HttpResponseMessage> message) where TContent : class
         {
-            return await message.Result.ReadAsAsync<TContent>();
+            var response = await message;
+            return await response.ReadAsAsync<TContent>();
         }
     }
 }

@@ -21,7 +21,7 @@ namespace SABIO.ClientApi.Core.Api
                 {
                     position = Math.Min(position, parent.Children.Length);
                     prev = position > 0 ? parent.Children[Math.Max(0, position - 1)]: null;
-                    next = parent.Children[position];
+                    next = parent?.Children?.Any() == true ? Check.TryCatch(() => parent.Children[position]) : null;
                 }
             }
             return CreateNodeAsync(newNode, prev?.Id, next?.Id);

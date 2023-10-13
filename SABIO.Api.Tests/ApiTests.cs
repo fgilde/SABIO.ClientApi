@@ -84,9 +84,35 @@ namespace SABIO.Api.Tests
         }
 
         [TestMethod]
+        public void CanGetPossibleGroups()
+        {
+            var node = TestClient.Apis.Tree.FindNodeAsync("ae84cd824c08a8b6014c08b20378004e").Result; // Tarife mit mindestumsatz
+            var groups = TestClient.Apis.Texts.GetGroupsAsync(node.Branches).Result;
+            Assert.AreEqual(4, groups.Data.Result.Length);
+            var allGroups = TestClient.Apis.Texts.GetGroupsAsync().Result;
+            Assert.AreEqual(9, allGroups.Data.Result.Length);
+        }
+
+
+        [TestMethod]
         public void TreeApiCanCreateNodes()
         {
             var node = TestClient.Api<TreeApi>().TreeAsync().Result.Data.Result.Children[0];
+            TreeNode newNode = new TreeNode()
+            {
+                Title = "New Tarif Node",
+                Group = TestClient.Apis.Authentication.GetCurrentUserAsync().Result.Groups.First(g => g.Id == "ae84cd824c31512c014c325bc2520619"),
+                CreatedBy = TestClient.Apis.Authentication.GetCurrentUserAsync().Result
+            };
+            var r = TestClient.Api<TreeApi>().CreateNodeAsync(newNode, node, 0).Result;
+            Assert.IsNotNull(r?.Data);
+            TestClient.Api<TreeApi>().DeleteNodeAsync(r.Data.Result.Id).Wait();
+        }
+
+        [TestMethod]
+        public void TreeApiCanCreateNodesOnResourceNodes()
+        {
+            var node = TestClient.Apis.Tree.FindNodeAsync("ae84cd824c08a8b6014c08b20378004e").Result; // Tarife mit mindestumsatz
             TreeNode newNode = new TreeNode()
             {
                 Title = "New Tarif Node",
