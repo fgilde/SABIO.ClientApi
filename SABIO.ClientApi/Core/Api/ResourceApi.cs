@@ -11,34 +11,34 @@ namespace SABIO.ClientApi.Core.Api
     public class ResourceApi<TDetail, TResult> : ResourceApi<TDetail>
         where TDetail : BaseResult<TResult>
     {
-        public Task<SabioResponse<TDetail>> EditAsync(TDetail detail)
+        public virtual Task<SabioResponse<TDetail>> EditAsync(TDetail detail)
         {
             return EditAsync(detail.Result);
         }
 
-        public Task<SabioResponse<TDetail>> EditAsync(string id, TDetail detail)
+        public virtual Task<SabioResponse<TDetail>> EditAsync(string id, TDetail detail)
         {
             return EditAsync(id, detail.Result);
         }
 
-        public Task<SabioResponse<TDetail>> EditAsync(string id, TResult detail)
+        public virtual Task<SabioResponse<TDetail>> EditAsync(string id, TResult detail)
         {
             Client.Cache?.Clear();
             return Client.PutAsync<SabioResponse<TDetail>>($"{ApiPath.Path}/{id}", EnsureRequiredPropertiesAreSet(detail));
         }
 
-        public Task<SabioResponse<TDetail>> EditAsync(TResult detail)
+        public virtual Task<SabioResponse<TDetail>> EditAsync(TResult detail)
         {
             // TODO Interface or base class for detail with id
             return EditAsync(typeof(TResult).GetProperty("Id")?.GetValue(detail).ToString(), detail);
         }
 
-        public Task<SabioResponse<TDetail>> CreateAsync(TDetail detail)
+        public virtual Task<SabioResponse<TDetail>> CreateAsync(TDetail detail)
         {
             return CreateAsync(detail.Result);
         }
 
-        public Task<SabioResponse<TDetail>> CreateAsync(TResult detail)
+        public virtual Task<SabioResponse<TDetail>> CreateAsync(TResult detail)
         {
             Client.Cache?.Clear();
             return Client.PostAsync<SabioResponse<TDetail>>($"{ApiPath.Path}", EnsureRequiredPropertiesAreSet(detail));
@@ -54,12 +54,12 @@ namespace SABIO.ClientApi.Core.Api
 
     public class ResourceApi<TDetail> : ResourceApi
     {
-        public Task<SabioResponse<TDetail>> GetAsync(string id)
+        public virtual Task<SabioResponse<TDetail>> GetAsync(string id)
         {
             return Client.GetAsync<SabioResponse<TDetail>>($"{ApiPath.Path}/{id}");
         }
 
-        public async Task<TDetail> GetFirstAsync()
+        public virtual async Task<TDetail> GetFirstAsync()
         {
             var pageResponse = await GetAllAsync(new SearchQuery { Limit = 1 });
             if (pageResponse.Success && pageResponse.Data.Result.Any())
@@ -67,24 +67,24 @@ namespace SABIO.ClientApi.Core.Api
             return default;
         }
 
-        public async Task<TDetail[]> GetAllDetailsAsync()
+        public virtual async Task<TDetail[]> GetAllDetailsAsync()
         {
             return (await GetAllExplicitAsync()).Select(r => r.Data).ToArray();
         }
 
-        public async Task<SabioResponse<TDetail>[]> GetAllExplicitAsync(SearchQuery searchQuery = null)
+        public virtual async Task<SabioResponse<TDetail>[]> GetAllExplicitAsync(SearchQuery searchQuery = null)
         {
             return await GetAsync((await GetAllAsync(searchQuery)).Data.Result.Select(result => result.Id));
         }
 
-        public async Task<SabioResponse<TDetail>[]> GetAsync(IEnumerable<string> ids)
+        public virtual async Task<SabioResponse<TDetail>[]> GetAsync(IEnumerable<string> ids)
         {
             var tasks = ids.Select(s => Client.GetAsync<SabioResponse<TDetail>>($"{ApiPath.Path}/{s}")).ToArray();
             await Task.WhenAll(tasks);
             return tasks.Select(task => task.Result).ToArray();
         }
 
-        public Task<SabioResponse<TDetail>[]> GetAsync(string id, params string[] ids)
+        public virtual Task<SabioResponse<TDetail>[]> GetAsync(string id, params string[] ids)
         {
             return GetAsync(new List<string>(new[] { id }).Concat(ids));
         }
@@ -93,20 +93,20 @@ namespace SABIO.ClientApi.Core.Api
 
     public class ResourceApi : SabioApiBase
     {
-        public ApiPathAttribute ApiPath => GetType().GetCustomAttributes<ApiPathAttribute>().FirstOrDefault();
+        public virtual ApiPathAttribute ApiPath => GetType().GetCustomAttributes<ApiPathAttribute>().FirstOrDefault();
 
-        public Task<PageResponse<PagedContent<SearchResult>>> GetAllAsync(SearchQuery searchQuery = null, bool ignoreCache = false)
+        public virtual Task<PageResponse<PagedContent<SearchResult>>> GetAllAsync(SearchQuery searchQuery = null, bool ignoreCache = false)
         {
             var apiPathPath = ApiPath?.Path ?? "/search";
             return Client.GetAsync<PageResponse<PagedContent<SearchResult>>>(apiPathPath, searchQuery ?? SearchQuery.Default, ignoreCache);
         }
 
-        public Task DeleteAsync(string id)
+        public virtual Task DeleteAsync(string id)
         {            
             return Client.DeleteAsync($"{ApiPath?.Path ?? "/search"}/{id}");
         }
 
-        public async Task<SearchResult> GetLastModifiedAsync()
+        public virtual async Task<SearchResult> GetLastModifiedAsync()
         {            
             return (await GetAllAsync(new SearchQuery(limit: 1)
                     .SortBy(result => result.LastModified, SortDirection.Descending)

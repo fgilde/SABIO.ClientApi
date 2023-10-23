@@ -29,10 +29,6 @@ namespace SABIO.Api.Tests
         [TestMethod]
         public void ApisCanWork()
         {
-            //var client = new SabioClient("https://helpline.getsabio.com/sabio/services", "helpline");
-            //var r = client.Apis.Authentication.LoginAsync("test", "abc").Result;
-            //var texts = client.Apis.Texts.GetAllAsync().Result;
-
             var c = TestClient;
             var con = c.Api<ConfigApi>().ClientConfigAsync().Result;
             var loginResult = c.Apis.Authentication.LoginAsync("4nils", "sonne").Result;
@@ -50,9 +46,6 @@ namespace SABIO.Api.Tests
             var config = c.Api<ConfigApi>().ConfigAsync().Result;
             var docs = c.Api<DocumentsApi>().GetAllAsync(new SearchQuery() { Term = "Do", Limit = 2 }).Result;
             var docs2 = c.Api<DocumentsApi>().GetAllAsync().Result;
-            var d = c.Api<DocumentsApi>().GetAsync(docs2.Data.Result.First().Id).Result;
-            var url = c.Apis.Authentication.AuthorizeUrl(d.Data.Result.InlineUri);
-            var b = c.HttpClient.GetByteArrayAsync(d.Data.Result.InlineUri).Result;
         }
 
         [TestMethod]

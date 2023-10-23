@@ -5,7 +5,7 @@ using SABIO.ClientApi.Responses.Types;
 namespace SABIO.ClientApi.Responses
 {
     public class ConfigResponse : SabioResponse<ConfigResult>
-    {}
+    { }
 
 
     public class ConfigResult
@@ -20,7 +20,7 @@ namespace SABIO.ClientApi.Responses
         public License License { get; set; }
     }
 
-    public class User 
+    public class User
     {
         public string Id { get; set; }
         public string Title { get; set; }
@@ -33,7 +33,7 @@ namespace SABIO.ClientApi.Responses
         public bool Deleted { get; set; }
         public bool Active { get; set; }
         public bool SabioUser { get; set; }
-        public Group[] Groups { get; set; }      
+        public Group[] Groups { get; set; }
         public string ObjectType { get; set; }
         public Permission UserPermission { get; set; }
     }
@@ -43,6 +43,8 @@ namespace SABIO.ClientApi.Responses
         public string Id { get; set; }
         public string Name { get; set; }
         public string Resource { get; set; }
+        public string ObjectType { get; set; }
+
     }
 
     public class System
@@ -91,6 +93,25 @@ namespace SABIO.ClientApi.Responses
         public int SynonymsLimit { get; set; }
         public bool ExternalClientRememberContentViewSelection { get; set; }
         public bool EnableCustomCss { get; set; }
+        public string AiBaseUrl { get; set; }
+        public string KeycloakBaseUrl { get; set; }
+
+        public bool MultiLanguages { get; set; }
+        public string UserManagement { get; set; }
+        public string UserGroupProvisioningMode { get; set; }
+        public bool UserLastActivePublic { get; set; }
+        public bool IsExternalMailingEnabled { get; set; }
+        public string CorsAllowedOrigins { get; set; }
+        public bool FileManagementEnabled { get; set; }
+        public bool BindSessionToCookie { get; set; }
+        public bool AllowUnsafeIframes { get; set; }
+        public Filemanagementsettings FileManagementSettings { get; set; }
+        public bool ClientTrackingEnabled { get; set; }
+        public bool DocumentMigrationDone { get; set; }
+        public bool EnableOfficePreviews { get; set; }
+        public bool AiSelfServiceEnabled { get; set; }
+
+
     }
 
     public class Version
@@ -150,7 +171,7 @@ namespace SABIO.ClientApi.Responses
         public Analysermeta AnalyserMeta { get; set; }
     }
 
-    public class Analysermeta 
+    public class Analysermeta
     {
         public string Id { get; set; }
         public string Name { get; set; }
@@ -167,7 +188,7 @@ namespace SABIO.ClientApi.Responses
         public Navigation[] Navigation { get; set; }
     }
 
-    public class Navigation 
+    public class Navigation
     {
         public string Id { get; set; }
         public string RealmId { get; set; }
@@ -191,7 +212,7 @@ namespace SABIO.ClientApi.Responses
         public string Route { get; set; }
     }
 
-    public class Child 
+    public class Child
     {
         public string Id { get; set; }
         public string Cls { get; set; }
@@ -215,8 +236,8 @@ namespace SABIO.ClientApi.Responses
         public bool Leaf { get; set; }
     }
 
-  
-    public class Facetset 
+
+    public class Facetset
     {
         public string Id { get; set; }
         public string RealmId { get; set; }
@@ -228,7 +249,7 @@ namespace SABIO.ClientApi.Responses
         public bool DefaultSet { get; set; }
     }
 
-    public class Filter 
+    public class Filter
     {
         public string Id { get; set; }
         [JsonProperty("hierarchical")]
@@ -288,7 +309,7 @@ namespace SABIO.ClientApi.Responses
         public string[] User { get; set; }
     }
 
-    public class Theme 
+    public class Theme
     {
         public string Id { get; set; }
 
@@ -317,13 +338,13 @@ namespace SABIO.ClientApi.Responses
         public string Navigationitemactivecolor { get; set; }
     }
 
-    public class Realm 
+    public class Realm
     {
         public string Id { get; set; }
         public string Name { get; set; }
     }
 
-    public class License 
+    public class License
     {
         public string Id { get; set; }
     }
@@ -337,4 +358,13 @@ namespace SABIO.ClientApi.Responses
 
     }
 
+    public class Filemanagementsettings
+    {
+        public string[] fileuploadrestriction { get; set; }
+        public string fileuploadrestrictiontype { get; set; }
+        public int fileuploadavsizelimit { get; set; }
+    }
+
 }
+
+

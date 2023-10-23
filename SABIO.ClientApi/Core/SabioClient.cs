@@ -19,7 +19,7 @@ namespace SABIO.ClientApi.Core
         public CacheProvider Cache { get; private set; }
         public string Realm { get; set; }
         public Uri BaseUrl { get; set; }
-        public HttpClient HttpClient => client ?? (client = CreateHttpClient());
+        public HttpClient HttpClient => client ??= CreateHttpClient();
         public Apis Apis { get; }
         public bool IsCachingEnabled => Cache != null;
         public bool IsLoggedIn => Api<AuthenticationApi>().IsLoggedIn;
@@ -116,6 +116,7 @@ namespace SABIO.ClientApi.Core
             result.BaseAddress = BaseUrl;
             result.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             result.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
+            //result.Timeout = TimeSpan.FromMinutes(10);
             return result;
         }
 

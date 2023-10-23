@@ -19,5 +19,6 @@ namespace SABIO.ClientApi.Core
         public ResourceApi ResourceApi => _client.Api<ResourceApi>();
         public TreeApi Tree => _client.Api<TreeApi>();        
         public PinboardsApi Pinboards => _client.Api<PinboardsApi>();        
+        public FileManagementApi FileManagement => _client.Api<FileManagementApi>();        
     }
 }

@@ -10,6 +10,11 @@ using SABIO.ClientApi.Responses.Types;
 
 namespace SABIO.Api.Tests
 {
+    public class TestBase<TApi> : TestBase where TApi : SabioApiBase, new()
+    {
+        public TApi Api => TestClient.Api<TApi>(); 
+    }
+
     public class TestBase
     {
         private SabioClient client;
