@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using SABIO.ClientApi.Responses;
 using System.Threading.Tasks;
 using SABIO.ClientApi.Responses.Types;
@@ -47,6 +49,46 @@ namespace SABIO.ClientApi.Core.Api
             var config = await Client.Apis.Config.ConfigAsync();
             return config.Data.System.FileManagementEnabled;
         }
+
+        public async Task<List<FileFolder>> CreateFolderStructureAsync(params string[] structures)
+        {
+            var result = new List<FileFolder>();
+            FileFolder folder;
+            string parentId;
+
+            foreach (var s in structures)
+            {
+                parentId = "root";
+                foreach (var n in s.Split('/').Where(str => !string.IsNullOrWhiteSpace(str)))
+                {
+                    folder = await GetOrCreateFolderAsync(new FileFolder { Title = n, ParentFolderId = parentId });
+                    result.Add(folder);
+                    parentId = folder.Id;
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<FileFolder> GetOrCreateFolderAsync(FileFolder options)
+        {
+            var response = await GetAllAsync(options.ParentFolderId);
+            var folder = response?.Data?.Result?.FirstOrDefault(f => f.Title == options.Title);
+
+            if (folder == null)
+            {
+                var newFolder = new FileFolder
+                {
+                    Title = options.Title,
+                    ParentFolderId = options.ParentFolderId
+                };
+                var createResponse = await CreateFolderAsync(newFolder);
+                folder = createResponse?.Data?.Result?.FirstOrDefault();
+            }
+
+            return folder;
+        }
+
     }
 }
 

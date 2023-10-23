@@ -18,6 +18,19 @@ public class FileManagementTests : TestBase<FileManagementApi>
     }
 
     [TestMethod]
+    public void CanCreateFolderStructure()
+    {
+        var result = Api.CreateFolderStructureAsync("/test/subtest/hello").Result;
+        var secondResult = Api.CreateFolderStructureAsync("/test/subtest/MoiNsen").Result;
+        Assert.AreEqual(3, result.Count);
+        var liveStructure = Api.GetAllAsync().Result.Data.Result;
+        Assert.IsTrue(liveStructure.Any(f => f.Id == result.First().Id));
+        Api.DeleteFolderAsync(result.First());
+        liveStructure = Api.GetAllAsync().Result.Data.Result;
+        Assert.IsFalse(liveStructure.Any(f => f.Id == result.First().Id));
+    }
+
+    [TestMethod]
     public void CanCreateFolder()
     {
         var result = Api.CreateFolderAsync(new FileFolder { Title = "Test Folder" }).Result;
