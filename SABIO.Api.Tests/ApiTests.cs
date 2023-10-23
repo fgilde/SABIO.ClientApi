@@ -227,25 +227,25 @@ namespace SABIO.Api.Tests
 
             var nodes = new[]
             {
-                tree.Data.Result.Children.First().Children.First().Children.First(),
-                tree.Data.Result.Children[2].Children.First().Children.First()
+                tree.Data.Result.Children.First()
             };
             User user = TestClient.Apis.Authentication.GetCurrentUserAsync().Result;
+            var branches = nodes.GetUniqueBranches().ToArray();
+            var group = TestClient.Apis.Texts.GetGroupsAsync(branches).Result.Data.Result.Last();
             Text textToCreate = new Text
             {
                 Title = title,
                 Paths = nodes.ToPathsArray(),
-                Branches = nodes.GetUniqueBranches().ToArray(),
+                Branches = branches,
                 Fragments = new[]
                 {
                     new Fragment {
-                        Content = "<p>Test</p><script>alert('Hallo');</script>\n",
-                        Branches = nodes.GetUniqueBranches().ToArray()
+                        Content = "Sample Text",
+                        Branches = branches
                     }
                 },
                 CreatedBy = user,
-                Group = user.Groups.First(g => g.Name == "Leiter Redaktion")
-                //Group = user.Groups.First(g => g.Name == "Atlantis GER Agent") // Das sabio BE ist so kacke, dass man bei dieser Gruppe z.B gar keinen Response mehr bekommt, der server also irgendwo direkt austeigt
+                Group = group
 
             };
 

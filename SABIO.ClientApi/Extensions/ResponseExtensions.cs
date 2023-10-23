@@ -11,6 +11,7 @@ namespace SABIO.ClientApi.Extensions
     {
         public static async Task<TContent> ReadAsAsync<TContent>(this HttpResponseMessage message) where TContent : class
         {
+            // TODO : Handle errors. 
             var responseJson = await message.Content.ReadAsStringAsync();
             if (typeof(TContent) == typeof(string))
                 return responseJson as TContent;

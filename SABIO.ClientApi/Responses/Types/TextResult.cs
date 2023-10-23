@@ -62,7 +62,8 @@ namespace SABIO.ClientApi.Responses.Types
         public string Type { get; set; }
         public object[] Tags { get; set; }
         public int AttachmentCount { get; set; }
-        public object[] Attachments { get; set; }
+        public string[] AttachedFiles { get; set; } // Document management
+        public object[] Attachments { get; set; } // Document management
         public int SubmissionCount { get; set; }
         public string SubmissionId { get; set; }
     }

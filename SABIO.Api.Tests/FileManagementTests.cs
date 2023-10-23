@@ -1,8 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SABIO.ClientApi.Core.Api;
 using SABIO.ClientApi.Responses.Types;
 using System.Linq;
+using System.Threading.Tasks;
 using SABIO.Api.Tests.Helper;
+using SABIO.ClientApi.Extensions;
+using SABIO.ClientApi.Responses;
+using SABIO.ClientApi.Types;
 using File = SABIO.ClientApi.Responses.Types.File;
 
 namespace SABIO.Api.Tests;
@@ -15,6 +20,61 @@ public class FileManagementTests : TestBase<FileManagementApi>
     {
         var config = TestClient.Apis.Config.ConfigAsync().Result;
         Assert.IsTrue(config.Data.System.FileManagementEnabled);
+    }
+
+    [TestMethod]
+    public void CanCreateWordFileAndAttachItToNewText()
+    {
+        File file = new File
+        {
+            Title = "Test File",
+            Filename = FilesFacade.WildRiceRecipes,
+            Owner = TestClient.Apis.Authentication.GetCurrentUserAsync().Result,
+            OwnerGroup = TestClient.Apis.Texts.GetGroupsAsync().Result.Data.Result.First(),
+            TargetGroups = TestClient.Apis.Texts.GetGroupsAsync().Result.Data.Result
+        };
+
+        var response = Api.CreateFileAsync(file.ToUploadableFile(Facade.Files.WildRiceRecipesData)).Result;
+        Assert.IsTrue(response.Success);
+
+        var createdFile = response.Data.Result;
+
+
+        var title = "New Created for " + file.Title;
+        var tree = TestClient.Api<TreeApi>().TreeAsync().Result;
+
+        var nodes = new[]
+        {
+            tree.Data.Result.Children.First()
+        };
+        User user = TestClient.Apis.Authentication.GetCurrentUserAsync().Result;
+        var branches = nodes.GetUniqueBranches().ToArray();
+        Text textToCreate = new Text
+        {
+            Title = title,
+            Paths = nodes.ToPathsArray(),
+            Branches = branches,
+            Fragments = new[]
+            {
+                new Fragment {
+                    Content = "Sample with attached file",
+                    Branches = branches,
+                    AttachedFiles = new[] { createdFile.Id }
+                }
+            },
+            CreatedBy = user,
+            Group = TestClient.Apis.Texts.GetGroupsAsync(branches).Result.Data.Result.First()
+            //Group = user.Groups.First(g => g.Name == "Atlantis GER Agent") // Das sabio BE ist so kacke, dass man bei dieser Gruppe z.B gar keinen Response mehr bekommt, der server also irgendwo direkt austeigt
+
+        };
+
+        var created = TestClient.Apis.Texts.CreateAsync(textToCreate).Result;
+        Task.Delay(3000).Wait(); // Wait because BE needs to update index
+        Assert.IsNotNull(created.Data);
+        Assert.IsTrue(created.Success);
+        SabioResponse<TextResult> found = TestClient.Api<TextsApi>().GetAllExplicitAsync(new SearchQuery(title, limit: 1)).Result.First();
+       
+
     }
 
     [TestMethod]
@@ -73,7 +133,8 @@ public class FileManagementTests : TestBase<FileManagementApi>
     {
         File file = new File
         {
-            Title = "Test File", Filename = FilesFacade.TestTxt,
+            Title = "Test File",
+            Filename = FilesFacade.TestTxt,
             Owner = TestClient.Apis.Authentication.GetCurrentUserAsync().Result,
             OwnerGroup = TestClient.Apis.Texts.GetGroupsAsync().Result.Data.Result.First(),
             TargetGroups = TestClient.Apis.Texts.GetGroupsAsync().Result.Data.Result
