@@ -27,11 +27,11 @@ namespace SABIO.Api.Tests
 
         protected TestFacade Facade;
 
-        protected SabioClient TestClient => client ??= new SabioClient(TestFacade.SabioUrl);
+        protected SabioClient TestClient => client ??= SabioClient.CreateAsync(TestFacade.SabioUrl).Result;
 
         protected SabioClient AuthenticateClient(TestUser user = null)
         {
-            user = user ?? Facade.Users.Editor;
+            user ??= Facade.Users.Editor;
             TestClient.Login(user);
             return TestClient;
         }

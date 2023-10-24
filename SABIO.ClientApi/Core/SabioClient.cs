@@ -25,18 +25,35 @@ namespace SABIO.ClientApi.Core
         public bool IsLoggedIn => Api<AuthenticationApi>().IsLoggedIn;
         public Task<bool> CanWorkAsync() => Api<ConfigApi>().IsConfigAvailableAsync();
 
-        public SabioClient(string url, string realm = "")
-            : this(new Uri(url.ToLower().StartsWith("http") ? url : $"https://{url}"), realm)
-        { }
-
-        public SabioClient(Uri baseUrl, string realm = "")
+        private SabioClient() // Make the constructor private
         {
-            BaseUrl = EnsureServiceUrl(baseUrl, out string detectedRealm);
-            Realm = !string.IsNullOrEmpty(realm) ? realm : detectedRealm;
             Apis = new Apis(this);
-            if (string.IsNullOrEmpty(Realm))
-                Realm = Apis.Config.ClientConfigAsync().Result.Data.Result.Realm;
         }
+
+        public static async Task<SabioClient> CreateAsync(Uri baseUrl, string realm = "")
+        {
+            var client = new SabioClient();
+
+            var httpClient = client.CreateHttpClient();
+            var (adjustedUrl, detectedRealm) = await AdjustServiceUrlAsync(httpClient, baseUrl);
+            client.BaseUrl = adjustedUrl;
+            client.Realm = !string.IsNullOrEmpty(realm) ? realm : detectedRealm;
+
+            if (string.IsNullOrEmpty(client.Realm))
+                client.Realm = (await client.Apis.Config.ClientConfigAsync()).Data.Result.Realm;
+
+            return client;
+        }
+
+
+        // You can also provide an overload for the string url
+        public static Task<SabioClient> CreateAsync(string url, string realm = "")
+        {
+            var uri = new Uri(url.ToLower().StartsWith("http") ? url : $"https://{url}");
+            return CreateAsync(uri, realm);
+        }
+
+
 
         public SabioClient EnableAutomaticCaching(IMemoryCache cache = null)
         {
@@ -120,30 +137,33 @@ namespace SABIO.ClientApi.Core
             return result;
         }
 
-        private Uri EnsureServiceUrl(Uri baseUrl, out string detectedRealm)
+        private static async Task<(Uri adjustedUrl, string detectedRealm)> AdjustServiceUrlAsync(HttpClient httpClient, Uri baseUrl)
         {
-            // TODO: Currently horrorble implementation, but supports old and new sabio urls as well
-            detectedRealm = "";
-            var builder = new UriBuilder(baseUrl);
-            var paths = builder.Path.Split('/').Where(s => !string.IsNullOrEmpty(s)).ToList();
-            if (paths.Contains("client") && paths.IndexOf("client") == paths.Count - 2) // last part is then realm name
-            {
-                detectedRealm = paths.Last();
-                paths.RemoveRange(paths.Count - 2, 2);
-            }
-            if (!paths.Any() || paths.Last() != "services")
-            {
-                var httpResponseMessage = CreateHttpClient().GetAsync($"{builder.Scheme}://{builder.Host}/sabio/services/_client").Result;
+            string detectedRealm = "";
 
-                paths.Clear();
-                paths.AddRange(
-                    httpResponseMessage
-                        .StatusCode == HttpStatusCode.OK
+            var builder = new UriBuilder(baseUrl);
+            var pathSegments = builder.Path.Split('/').Where(s => !string.IsNullOrEmpty(s)).ToList();
+
+            if (pathSegments.Contains("client") && pathSegments.IndexOf("client") == pathSegments.Count - 2) // last part is then realm name
+            {
+                detectedRealm = pathSegments.Last();
+                pathSegments.RemoveRange(pathSegments.Count - 2, 2);
+            }
+
+            if (!pathSegments.Any() || pathSegments.Last() != "services")
+            {
+                var httpResponseMessage = await httpClient.GetAsync($"{builder.Scheme}://{builder.Host}/sabio/services/_client");
+
+                pathSegments.Clear();
+                pathSegments.AddRange(
+                    httpResponseMessage.StatusCode == HttpStatusCode.OK
                         ? new[] { "sabio", "services" }
                         : new[] { "sabio-web", "services" });
             }
-            builder.Path = string.Join("/", paths);
-            return builder.Uri;
+
+            builder.Path = string.Join("/", pathSegments);
+            return (builder.Uri, detectedRealm);
         }
+
     }
 }

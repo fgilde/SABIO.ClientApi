@@ -11,7 +11,7 @@ namespace SABIO.Console
 
         static void Main(string[] args)
         {
-            var c = new SabioClient("https://pcfg.test3.sabio.de/sabio-web/services", "qa-test");
+            var c = SabioClient.CreateAsync("https://pcfg.test3.sabio.de/sabio-web/services", "qa-test").Result;
             c.Apis.Authentication.LoginAsync("4nils", "sonne").Wait();
             
             var config = c.Api<ConfigApi>().ConfigAsync().Result;

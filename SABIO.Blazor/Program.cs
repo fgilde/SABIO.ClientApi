@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
-builder.Services.AddSingleton(provider => new SabioClient("https://maestro-fg-knowledge.nomad-internal.sabio.de/sabio-web/services", "qa-test"))
+builder.Services.AddSingleton(provider => SabioClient.CreateAsync("https://maestro-fg-knowledge.nomad-internal.sabio.de/sabio-web/services", "qa-test").Result)
     .AddDerivedFrom<SabioApiBase>((provider, type) => provider.GetService<SabioClient>().Api(type));
 
 

@@ -123,10 +123,10 @@ namespace SABIO.Api.Tests
         public void ConnectionTest()
         {
             var url = new Uri(TestFacade.SabioUrl);
-            var client = new SabioClient(url.Host + "/client/realm");
+            var client = SabioClient.CreateAsync(url.Host + "/client/realm").Result;
             Assert.AreEqual("realm", client.Realm);
             Assert.IsFalse(client.BaseUrl.AbsoluteUri.Contains("/client/realm"));
-            client = new SabioClient(url.Host);
+            client = SabioClient.CreateAsync(url.Host).Result;
             client.Login(Facade.Users.Admin);
             var lastModified = client.Apis.ResourceApi.GetLastModifiedAsync().Result;
             Assert.IsNotNull(lastModified);
@@ -425,7 +425,7 @@ namespace SABIO.Api.Tests
         [TestMethod]
         public void CanLogin()
         {
-            var c = new SabioClient(TestFacade.SabioUrl);
+            var c = SabioClient.CreateAsync(TestFacade.SabioUrl).Result;
             var loginResult = c.Apis.Authentication.LoginAsync("4nils", "sonne").Result;
             Assert.IsTrue(loginResult.Success && !string.IsNullOrEmpty(loginResult.Data.Key));
 
@@ -434,7 +434,7 @@ namespace SABIO.Api.Tests
         [TestMethod]
         public void InsideCanWork()
         {
-            var result = new SabioClient("https://inside.sabio.de/sabio/services", "inside");
+            var result = SabioClient.CreateAsync("https://inside.sabio.de/sabio/services", "inside").Result;
             var canWork = result.Api<ConfigApi>().ClientConfigAsync().Result.Success;
             Assert.IsTrue(canWork);
             Assert.IsTrue(result.CanWorkAsync().Result);
