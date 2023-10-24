@@ -2,6 +2,7 @@
 using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SABIO.Api.Tests.Helper;
+using SABIO.Api.Tests.Helper.Facades;
 using SABIO.ClientApi.Core;
 using SABIO.ClientApi.Core.Api;
 using SABIO.ClientApi.Extensions;
@@ -17,9 +18,16 @@ namespace SABIO.Api.Tests
 
     public class TestBase
     {
+        public TestBase()
+        {
+            Facade = new TestFacade(TestClient);
+        }
+
         private SabioClient client;
 
-        protected SabioClient TestClient => client ?? (client = new SabioClient(Facade.SabioUrl, Facade.Realm));
+        protected TestFacade Facade;
+
+        protected SabioClient TestClient => client ??= new SabioClient(TestFacade.SabioUrl);
 
         protected SabioClient AuthenticateClient(TestUser user = null)
         {
@@ -28,7 +36,6 @@ namespace SABIO.Api.Tests
             return TestClient;
         }
 
-        protected TestFacade Facade = new TestFacade();
 
         [TestInitialize]
         public void TestInitialize()

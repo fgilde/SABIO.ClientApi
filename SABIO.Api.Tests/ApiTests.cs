@@ -79,7 +79,7 @@ namespace SABIO.Api.Tests
         [TestMethod]
         public void CanGetPossibleGroups()
         {
-            var node = TestClient.Apis.Tree.FindNodeAsync("ae84cd824c08a8b6014c08b20378004e").Result; // Tarife mit mindestumsatz
+            var node = TestClient.Apis.Tree.FindNodeAsync(Facade.Nodes.TarifeMitMindestUmsatzId).Result; // Tarife mit mindestumsatz
             var groups = TestClient.Apis.Texts.GetGroupsAsync(node.Branches).Result;
             Assert.AreEqual(4, groups.Data.Result.Length);
             var allGroups = TestClient.Apis.Texts.GetGroupsAsync().Result;
@@ -122,7 +122,7 @@ namespace SABIO.Api.Tests
         [TestMethod]
         public void ConnectionTest()
         {
-            var url = new Uri(Facade.SabioUrl);
+            var url = new Uri(TestFacade.SabioUrl);
             var client = new SabioClient(url.Host + "/client/realm");
             Assert.AreEqual("realm", client.Realm);
             Assert.IsFalse(client.BaseUrl.AbsoluteUri.Contains("/client/realm"));
@@ -425,7 +425,7 @@ namespace SABIO.Api.Tests
         [TestMethod]
         public void CanLogin()
         {
-            var c = new SabioClient(Facade.SabioUrl, Facade.Realm);
+            var c = new SabioClient(TestFacade.SabioUrl);
             var loginResult = c.Apis.Authentication.LoginAsync("4nils", "sonne").Result;
             Assert.IsTrue(loginResult.Success && !string.IsNullOrEmpty(loginResult.Data.Key));
 

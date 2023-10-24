@@ -133,9 +133,11 @@ namespace SABIO.ClientApi.Core
             }
             if (!paths.Any() || paths.Last() != "services")
             {
+                var httpResponseMessage = CreateHttpClient().GetAsync($"{builder.Scheme}://{builder.Host}/sabio/services/_client").Result;
+
                 paths.Clear();
                 paths.AddRange(
-                    CreateHttpClient().GetAsync($"{builder.Scheme}://{builder.Host}/sabio/services/_client").Result
+                    httpResponseMessage
                         .StatusCode == HttpStatusCode.OK
                         ? new[] { "sabio", "services" }
                         : new[] { "sabio-web", "services" });

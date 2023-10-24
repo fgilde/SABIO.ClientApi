@@ -1,4 +1,5 @@
-﻿using SABIO.ClientApi.Core;
+﻿using SABIO.Api.Tests.Helper.Facades;
+using SABIO.ClientApi.Core;
 using SABIO.ClientApi.Responses;
 
 namespace SABIO.Api.Tests.Helper

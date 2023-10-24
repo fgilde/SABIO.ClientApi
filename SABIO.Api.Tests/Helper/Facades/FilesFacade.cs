@@ -1,15 +1,16 @@
 ﻿using System;
+using SABIO.ClientApi.Core;
 
-namespace SABIO.Api.Tests.Helper;
+namespace SABIO.Api.Tests.Helper.Facades;
 
-public class FilesFacade
+public class FilesFacade : FacadeBase
 {
     public const string TestTxt = "test.txt";
     public const string WildRiceRecipes = "WildRiceRecipes.docx";
     private readonly Lazy<byte[]> _testTxtData;
     private readonly Lazy<byte[]> _wildRiceRecipesData;
 
-    public FilesFacade()
+    public FilesFacade(SabioClient c) : base(c)
     {
         _testTxtData = new Lazy<byte[]>(() => ReadTestFile(TestTxt));
         _wildRiceRecipesData = new Lazy<byte[]>(() => ReadTestFile(WildRiceRecipes));

@@ -17,7 +17,7 @@ namespace SABIO.ClientApi.Responses.Types
     {
         private TreeNode[] path;
         private string _parentId;
-
+        public bool NewlyCreated { get; set; }
         public string Id { get; set; }
         public string ObjectType { get; set; } = "TreeResource";
         public Permission UserPermission { get; set; }

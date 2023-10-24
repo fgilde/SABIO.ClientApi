@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using System.Xml.Linq;
 using SABIO.ClientApi.Extensions;
 using SABIO.ClientApi.Responses;
 using SABIO.ClientApi.Responses.Types;
@@ -49,6 +52,38 @@ namespace SABIO.ClientApi.Core.Api
         {
             return Client.GetAsync<SabioResponse<TreeResult>>($"/tree/{treeId}", defaultGetParams)
                 .ContinueWith(task => AddParentInformations(task.Result));
+        }
+
+        public async Task<List<TreeNode>> CreateNodeStructureAsync(string path, TreeNode parentNode = null, Branch[] branches = null, User user = null, Group group = null)
+        {
+            var result = new List<TreeNode>();
+            var node = parentNode ?? (await TreeAsync()).Data.Result;
+            if (node != null && !string.IsNullOrEmpty(path) && path != "/")
+            {
+                branches ??= node.Branches;
+                user ??= await Client.Apis.Authentication.GetCurrentUserAsync();
+                group ??= node.Group ?? (await Client.Apis.Texts.GetGroupsAsync(branches)).Data.Result.FirstOrDefault();
+                foreach (var segment in path.Split('/').Where(s => !string.IsNullOrWhiteSpace(s)))
+                {
+                    node = node?.Children?.FirstOrDefault(n => n.Title == segment) ?? await CreateNodeAsync(segment, node, branches, user, group);
+                    if(node != null)
+                        result.Add(node);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<TreeNode> CreateNodeAsync(string title, TreeNode parentNode = null, Branch[] branches = null, User user = null, Group group = null)
+        {
+            var res = await CreateNodeAsync(new TreeNode { Title = title, Group = group, CreatedBy = user, Branches = branches }, parentNode);
+            if (res?.Success == true)
+            {
+                var node = await FindNodeAsync(res.Data.Result.Id);
+                node.NewlyCreated = true;
+                return node;
+            }
+            return null;
         }
 
         private SabioResponse<TreeResult> AddParentInformations(SabioResponse<TreeResult> response)
